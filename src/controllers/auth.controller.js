@@ -16,11 +16,11 @@ export async function register(req, res, next) {
   try {
     let { name, email, password, role } = req.body;
 
-    // const existing = await User.findOne({ email });
-    // if (existing) {
-    //   throw ApiError.conflict("Email already exists");
-    // }
-
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(409).json({
+        error: { message: "Email already exists" }
+      });
 
     const user = await User.create({
       name,
