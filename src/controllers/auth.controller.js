@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/user.model.js';
 import { signToken } from '../utils/jwt.js';
+import ApiError from '../utils/api-error.js';
+import ApiResponse from '../utils/api-response.js';
 
 /**
  * TODO: Register a new user
@@ -13,7 +15,25 @@ import { signToken } from '../utils/jwt.js';
  */
 export async function register(req, res, next) {
   try {
-    // Your code here
+    let { name, email, password, role } = req.body;
+
+    // const existing = await User.findOne({ email });
+    // if (existing) {
+    //   throw ApiError.conflict("Email already exists");
+    // }
+
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role
+    })
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(201).json({ user: userObj });
   } catch (error) {
     next(error);
   }
@@ -32,7 +52,27 @@ export async function register(req, res, next) {
  */
 export async function login(req, res, next) {
   try {
-    // Your code here
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email }).select("+password");
+    if (!user)
+      return res.status(401).json({ error: { message: "Invalid credentials" } });
+
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch)
+      return res.status(401).json({ error: { message: "Invalid credentials" } });
+
+    const jwtToken = signToken({ userId: user._id, email: user.email, role: user.role });
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(200).json({
+      user: userObj,
+      token: jwtToken
+    });
+
   } catch (error) {
     next(error);
   }
@@ -46,7 +86,9 @@ export async function login(req, res, next) {
  */
 export async function me(req, res, next) {
   try {
-    // Your code here
+    return res.status(200).json({
+      user: req.user
+    })
   } catch (error) {
     next(error);
   }

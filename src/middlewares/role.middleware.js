@@ -1,3 +1,5 @@
+import ApiError from "../utils/api-error";
+
 /**
  * TODO: Check if user has required role
  *
@@ -14,6 +16,21 @@
  */
 export function requireRole(...roles) {
   return (req, res, next) => {
-    // Your code here
+    // 1. Not authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        error: { message: "Not authenticated" }
+      });
+    }
+
+    // 2. Forbidden
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        error: { message: "Forbidden" }
+      });
+    }
+
+    // 3. OK
+    next();
   };
 }

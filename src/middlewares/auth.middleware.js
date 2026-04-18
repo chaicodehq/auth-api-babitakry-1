@@ -1,4 +1,5 @@
 import { User } from '../models/user.model.js';
+import ApiError from '../utils/api-error.js';
 import { verifyToken } from '../utils/jwt.js';
 
 /**
@@ -17,7 +18,33 @@ import { verifyToken } from '../utils/jwt.js';
  */
 export async function authenticate(req, res, next) {
   try {
-    // Your code here
+    let token;
+
+    if (req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token)
+      return res.status(401).json({ error: { message: "No token provided" } });
+
+    let decoded;
+    try {
+      decoded = verifyToken(token);
+    } catch (err) {
+      return res.status(401).json({ error: { message: "Invalid token" } });
+    }
+
+    const user = await User.findById(decoded.userId);
+    if (!user)
+      return res.status(401).json({ error: { message: "Invalid token" } });
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    req.user = userObj;
+
+    next();
+    
   } catch (error) {
     return res.status(401).json({ error: { message: 'Invalid token' } });
   }

@@ -9,5 +9,24 @@
  *    - Return 500 with { error: { message: error.message } }
  */
 export function errorHandler(error, req, res, next) {
-  // Your code here
+  // 1. Mongoose validation error
+  if (error.name === "ValidationError") {
+    return res.status(400).json({
+      error: {message: error.message}
+    });
+  }
+
+  // 2. Duplicate key error
+  if (error.code === 11000) {
+    return res.status(409).json({
+      error: {message: "Email already exists"}
+    });
+  }
+
+  // 3. Other errors
+  return res.status(500).json({
+    error: {
+      message: error.message
+    }
+  });
 }
