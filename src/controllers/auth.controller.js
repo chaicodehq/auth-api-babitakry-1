@@ -1,8 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/user.model.js';
 import { signToken } from '../utils/jwt.js';
-import ApiError from '../utils/api-error.js';
-import ApiResponse from '../utils/api-response.js';
+
 
 /**
  * TODO: Register a new user
