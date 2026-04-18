@@ -1,5 +1,4 @@
 import { User } from '../models/user.model.js';
-import ApiError from '../utils/api-error.js';
 import { verifyToken } from '../utils/jwt.js';
 
 /**

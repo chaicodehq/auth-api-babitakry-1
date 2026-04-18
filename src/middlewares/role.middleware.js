@@ -1,4 +1,3 @@
-import ApiError from "../utils/api-error";
 
 /**
  * TODO: Check if user has required role
